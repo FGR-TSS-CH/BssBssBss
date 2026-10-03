@@ -21,7 +21,12 @@ export class Game {
     this.audio=new AudioSystem();
     this.room=new Room(this.scene,ROOM);
     this.collision=new CollisionSystem(this.room);this.collision.setObstacles(this.room.furniture);
-    this.cats=CATS.map((c,i)=>new Cat(this.scene,c,new THREE.Vector3(-2+i*2,0,2)));
+    const catSpawns=[
+      new THREE.Vector3(-6,0,5),
+      new THREE.Vector3(0,0,6),
+      new THREE.Vector3(6,0,4)
+    ];
+    this.cats=CATS.map((c,i)=>new Cat(this.scene,c,catSpawns[i]));
     this.playTransforms=this.cats.map(c=>({position:c.group.position.clone(),rotationY:c.group.rotation.y}));
     this.active=0;
     this.human=new Human(this.scene);
@@ -73,12 +78,49 @@ export class Game {
   }
   updateMenu(dt,t){
     const focusX=(this.active-1)*.45;
-    const desired=new THREE.Vector3(.2,2.0,5.7);this.camera.position.lerp(desired,1-Math.exp(-3*dt));this.camera.lookAt(focusX,.75,0);
-    this.cats.forEach((c,i)=>{const target=(i-1)*1.55;c.group.position.x+=(target-c.group.position.x)*(1-Math.exp(-5*dt));c.group.position.z+=(0-c.group.position.z)*(1-Math.exp(-5*dt));c.animate(dt,t);});
+    const desired=new THREE.Vector3(.2,2.0,5.7);
+    this.camera.position.lerp(desired,1-Math.exp(-3*dt));
+    this.camera.lookAt(focusX,.75,0);
+    this.cats.forEach((c,i)=>{
+      const target=(i-1)*1.55;
+      c.group.position.x+=(target-c.group.position.x)*(1-Math.exp(-5*dt));
+      c.group.position.z+=(0-c.group.position.z)*(1-Math.exp(-5*dt));
+      c.animate(dt,t);
+    });
+  }
+  resolveCharacters(activeCat){
+    const minHuman=activeCat.config.radius+.48;
+    let dx=activeCat.group.position.x-this.human.group.position.x;
+    let dz=activeCat.group.position.z-this.human.group.position.z;
+    let dist=Math.hypot(dx,dz);
+    if(dist<minHuman){
+      if(dist<.001){dx=1;dz=0;dist=1;}
+      activeCat.group.position.x=this.human.group.position.x+dx/dist*minHuman;
+      activeCat.group.position.z=this.human.group.position.z+dz/dist*minHuman;
+    }
+
+    for(const other of this.cats){
+      if(other===activeCat) continue;
+      const minDist=activeCat.config.radius+other.config.radius+.18;
+      let ox=activeCat.group.position.x-other.group.position.x;
+      let oz=activeCat.group.position.z-other.group.position.z;
+      let d=Math.hypot(ox,oz);
+      if(d<minDist){
+        if(d<.001){ox=1;oz=0;d=1;}
+        activeCat.group.position.x=other.group.position.x+ox/d*minDist;
+        activeCat.group.position.z=other.group.position.z+oz/d*minDist;
+      }
+    }
   }
   loop(now){
     const dt=Math.min(.033,(now-this.last)/1000);this.last=now;const t=now*.001;
-    if(this.mode==="play"){this.movement.update(this.cats[this.active],dt);this.cameraCtrl.update(this.cats[this.active].group.position,dt);this.human.update(dt,this.collision);}
+    if(this.mode==="play"){
+      const activeCat=this.cats[this.active];
+      this.movement.update(activeCat,dt);
+      this.resolveCharacters(activeCat);
+      this.cameraCtrl.update(activeCat.group.position,dt);
+      this.human.update(dt,this.collision);
+    }
     else if(this.mode==="editor")this.editor.update(dt);
     else this.updateMenu(dt,t);
     this.cats.forEach(c=>{if(this.mode!=="menu")c.animate(dt,t)});
