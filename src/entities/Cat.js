@@ -65,14 +65,14 @@ export class Cat {
     const airborne=!this.grounded;
     this.body.position.y=.58 + (airborne?0:Math.sin(this.gait*2)*.018*a);
     this.body.rotation.x = airborne ? THREE.MathUtils.clamp(-this.verticalVelocity*.04,-.3,.25) : Math.sin(this.gait*2)*.03*a;
-    this.headPivot.rotation.x += ((airborne?.15:0)-this.headPivot.rotation.x)*Math.min(1,dt*8);
+    this.headPivot.rotation.x += (((airborne ? .15 : 0))-this.headPivot.rotation.x)*Math.min(1,dt*8);
     this.legs.forEach((l,i)=>{
       if(airborne){
         l.pivot.rotation.z += ((l.hind?-.85:-.55)-l.pivot.rotation.z)*Math.min(1,dt*10);
-        l.lower.rotation.z += ((l.hind?.8:.55)-l.lower.rotation.z)*Math.min(1,dt*10);
+        l.lower.rotation.z += ((l.hind ? .8 : .55)-l.lower.rotation.z)*Math.min(1,dt*10);
       }else{
         const s=Math.sin(this.gait+l.phase);
-        l.pivot.rotation.z=s*(running?.72:.50)*a;
+        l.pivot.rotation.z=s*(running ? .72 : .50)*a;
         l.lower.rotation.z=Math.max(0,-s)*.14*a-l.pivot.rotation.z*.35;
       }
     });
