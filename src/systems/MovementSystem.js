@@ -29,6 +29,7 @@ export class MovementSystem {
       cat.jumpBuffer=0;
       cat.coyote=0;
       cat.jumpState="air";
+      cat.jumpPulse=.12;
       this.audio?.jump();
     }
 
@@ -47,7 +48,10 @@ export class MovementSystem {
       cat.verticalVelocity=0;
       cat.grounded=true;
       cat.jumpState="ground";
-      if(!wasGrounded) this.audio?.land();
+      if(!wasGrounded){
+        cat.landPulse=.16;
+        this.audio?.land();
+      }
     }else{
       cat.grounded=false;
     }
