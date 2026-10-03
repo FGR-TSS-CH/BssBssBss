@@ -30,9 +30,9 @@ export class Cat {
     const eyeMat=material(config.colors.eye,{roughness:.18,clearcoat:1,clearcoatRoughness:.12});
 
     const id=config.id;
-    const slender=id==="piet"?0.88:id==="yuki"?1.10:0.95;
-    const legScale=id==="piet"?1.10:id==="yuki"?0.92:1.0;
-    const headScale=id==="zelda"?0.92:id==="yuki"?1.04:.98;
+    const slender=id==="piet" ? 0.78 : id==="yuki" ? 1.18 : 0.90;
+    const legScale=id==="piet" ? 1.22 : id==="yuki" ? 0.86 : 1.0;
+    const headScale=id==="zelda" ? 0.90 : id==="yuki" ? 1.06 : .96;
 
     this.body=cast(new THREE.Mesh(new THREE.CapsuleGeometry(config.body.width*.40,config.body.length*.62,10,18),fur));
     this.body.rotation.z=Math.PI/2;
@@ -164,7 +164,7 @@ export class Cat {
     parent.position.set(-config.body.length*.58,.67,0);
     this.model.add(parent);
     const segmentLength=config.tail.length/config.tail.segments;
-    const tailThickness=config.tail.thickness*(id==="zelda"?1.35:1);
+    const tailThickness=config.tail.thickness*(id==="zelda" ? 1.75 : id==="yuki" ? 1.15 : 1);
     for(let i=0;i<config.tail.segments;i++){
       const pivot=new THREE.Group();
       if(i) pivot.position.x=-segmentLength*.72;
@@ -182,9 +182,9 @@ export class Cat {
       parent=pivot;
     }
 
-    if(id==="piet") this.model.scale.set(1.02,1.03,.98);
-    if(id==="zelda") this.model.scale.set(.94,.96,.94);
-    if(id==="yuki") this.model.scale.set(1.05,1.02,1.08);
+    if(id==="piet") this.model.scale.set(1.05,1.04,.94);
+    if(id==="zelda") this.model.scale.set(.92,.94,.92);
+    if(id==="yuki") this.model.scale.set(1.08,1.00,1.13);
 
     scene.add(this.group);
   }
@@ -205,21 +205,21 @@ export class Cat {
     this.model.rotation.x+=(pitch-this.model.rotation.x)*Math.min(1,dt*9);
     this.model.rotation.z+=(Math.sin(this.gait)*.02*amount-this.model.rotation.z)*Math.min(1,dt*7);
 
-    const headTargetX=(airborne?.14:0)-this.model.rotation.x*.35+Math.sin(time*.9)*.018;
+    const headTargetX=(airborne ? .14 : 0)-this.model.rotation.x*.35+Math.sin(time*.9)*.018;
     this.headPivot.rotation.x+=(headTargetX-this.headPivot.rotation.x)*Math.min(1,dt*7);
     this.headPivot.rotation.y+=(Math.sin(time*.65)*.055-this.headPivot.rotation.y)*Math.min(1,dt*4);
 
     this.legs.forEach((leg)=>{
       if(airborne){
-        const hipTarget=leg.hind?-.85:-.50;
-        const kneeTarget=leg.hind?.75:.52;
+        const hipTarget=leg.hind ? -.85 : -.50;
+        const kneeTarget=leg.hind ? .75 : .52;
         leg.hip.rotation.z+=(hipTarget-leg.hip.rotation.z)*Math.min(1,dt*10);
         leg.knee.rotation.z+=(kneeTarget-leg.knee.rotation.z)*Math.min(1,dt*10);
       }else{
         const s=Math.sin(this.gait+leg.phase);
-        const stride=s*(running?.68:.46)*amount;
+        const stride=s*(running ? .68 : .46)*amount;
         leg.hip.rotation.z+=(stride-leg.hip.rotation.z)*Math.min(1,dt*10);
-        const bend=Math.max(0,-s)*(running?.22:.14)*amount-stride*.32;
+        const bend=Math.max(0,-s)*(running ? .22 : .14)*amount-stride*.32;
         leg.knee.rotation.z+=(bend-leg.knee.rotation.z)*Math.min(1,dt*10);
       }
     });
@@ -227,8 +227,12 @@ export class Cat {
     this.tail.forEach((p,i)=>{
       const sway=Math.sin(time*1.6+i*.45)*(.18/(1+i*.14))+(moving?Math.sin(this.gait*.5+i*.2)*.05*amount:0);
       p.rotation.y=sway;
-      const base=this.config.id==="yuki"?.18:.27;
+      const base=this.config.id==="yuki" ? .18 : .27;
       p.rotation.z=base/(1+i*.12)+Math.sin(time*.7+i*.2)*.018;
+      if(this.config.id==="zelda"){
+        p.rotation.z += .055 + i*.014;
+        p.rotation.y += Math.sin(time*.55+i*.18)*.035;
+      }
     });
   }
 }
