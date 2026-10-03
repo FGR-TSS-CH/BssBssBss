@@ -282,7 +282,7 @@ export class Piet {
     this.shoulderMass.rotation.x=smooth(this.shoulderMass.rotation.x,roll,7,dt);
     this.hipMass.rotation.x=smooth(this.hipMass.rotation.x,-roll*.85,7,dt);
 
-    const headTarget=(airborne ? (this.verticalVelocity>0?.08:-.035) : 0)-this.spine.rotation.z*.30;
+    const headTarget=(airborne ? (this.verticalVelocity>0 ? .08 : -.035) : 0)-this.spine.rotation.z*.30;
     this.headPivot.rotation.z=smooth(this.headPivot.rotation.z,headTarget,8,dt);
     this.headPivot.rotation.y=smooth(this.headPivot.rotation.y,Math.sin(time*.58)*.04,4,dt);
 
@@ -290,27 +290,27 @@ export class Piet {
       if(airborne){
         const ascending=this.verticalVelocity>.25;
         const rootTarget=ascending
-          ? (leg.hind?-.62:-.38)
-          : (leg.hind?-.20:.28);
+          ? (leg.hind ? -.62 : -.38)
+          : (leg.hind ? -.20 : .28);
         const jointTarget=ascending
-          ? (leg.hind?.84:.52)
-          : (leg.hind?.50:.14);
+          ? (leg.hind ? .84 : .52)
+          : (leg.hind ? .50 : .14);
 
         leg.root.rotation.z=smooth(leg.root.rotation.z,rootTarget,11,dt);
         leg.joint.rotation.z=smooth(leg.joint.rotation.z,jointTarget,11,dt);
         if(leg.hock) leg.hock.rotation.z=smooth(leg.hock.rotation.z,.20,10,dt);
       }else{
-        const phase=running?leg.runPhase:leg.walkPhase;
+        const phase=running ? leg.runPhase : leg.walkPhase;
         const s=Math.sin(this.gait+phase);
-        const stride=s*(running?.60:.38)*amount;
+        const stride=s*(running ? .60 : .38)*amount;
         leg.root.rotation.z=smooth(leg.root.rotation.z,stride,12,dt);
 
         if(leg.hind){
-          const bend=Math.max(0,-s)*(running?.38:.26)*amount-stride*.24;
+          const bend=Math.max(0,-s)*(running ? .38 : .26)*amount-stride*.24;
           leg.joint.rotation.z=smooth(leg.joint.rotation.z,bend,12,dt);
           leg.hock.rotation.z=smooth(leg.hock.rotation.z,-bend*.42,12,dt);
         }else{
-          const bend=Math.max(0,-s)*(running?.24:.16)*amount-stride*.18;
+          const bend=Math.max(0,-s)*(running ? .24 : .16)*amount-stride*.18;
           leg.joint.rotation.z=smooth(leg.joint.rotation.z,bend,12,dt);
         }
       }
