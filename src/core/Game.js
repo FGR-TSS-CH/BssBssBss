@@ -15,7 +15,7 @@ export class Game {
   constructor(){
     this.scene=new THREE.Scene();this.scene.background=new THREE.Color(0xa8c4d6);
     this.camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.08,160);
-    this.renderer=new THREE.WebGLRenderer({antialias:true});this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));this.renderer.setSize(innerWidth,innerHeight);this.renderer.shadowMap.enabled=true;const mount=document.querySelector("#app")||document.body;mount.appendChild(this.renderer.domElement);
+    this.renderer=new THREE.WebGLRenderer({antialias:true});this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));this.renderer.setSize(innerWidth,innerHeight);this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.05;const mount=document.querySelector("#app")||document.body;mount.appendChild(this.renderer.domElement);
     this.scene.add(new THREE.HemisphereLight(0xffffff,0x665544,1.7));const sun=new THREE.DirectionalLight(0xfff4df,2.2);sun.position.set(10,18,7);sun.castShadow=true;this.scene.add(sun);
     this.input=new Input(this.renderer.domElement);
     this.audio=new AudioSystem();
