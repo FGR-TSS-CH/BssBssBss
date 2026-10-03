@@ -93,18 +93,23 @@ export class Human {
       this.legs.push({hip,knee});
     }
 
-    this.group.position.set(7,0,-4);
+    this.group.position.set(4,0,-6.5);
     this.path=[
-      new THREE.Vector3(7,0,-4),
-      new THREE.Vector3(11,0,-2),
-      new THREE.Vector3(11,0,5),
-      new THREE.Vector3(5,0,6),
-      new THREE.Vector3(3,0,2),
-      new THREE.Vector3(6,0,-1)
+      new THREE.Vector3(4,0,-6.5),
+      new THREE.Vector3(11.5,0,-6.5),
+      new THREE.Vector3(13.5,0,-1.5),
+      new THREE.Vector3(12,0,7.5),
+      new THREE.Vector3(4.5,0,8.5),
+      new THREE.Vector3(-5,0,8.0),
+      new THREE.Vector3(-12,0,5.5),
+      new THREE.Vector3(-13,0,-4.5),
+      new THREE.Vector3(-5,0,-7.0)
     ];
     this.pathIndex=1;
     this.walk=0;
     this.pause=0;
+    this.stuckTime=0;
+    this.lastPosition=this.group.position.clone();
   }
 
   update(dt,collision){
@@ -139,6 +144,21 @@ export class Human {
 
     this.group.position.x=resolved.x;
     this.group.position.z=resolved.z;
+
+    const moved=this.group.position.distanceToSquared(this.lastPosition);
+    if(moved<0.00001){
+      this.stuckTime+=dt;
+    }else{
+      this.stuckTime=0;
+      this.lastPosition.copy(this.group.position);
+    }
+
+    if(this.stuckTime>0.8){
+      this.pathIndex=(this.pathIndex+1)%this.path.length;
+      this.stuckTime=0;
+      this.pause=.15;
+      return;
+    }
 
     const yaw=Math.atan2(delta.x,delta.z)-Math.PI/2;
     let diff=yaw-this.group.rotation.y;
