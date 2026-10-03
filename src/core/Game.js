@@ -22,6 +22,7 @@ export class Game {
     this.room=new Room(this.scene,ROOM);
     this.collision=new CollisionSystem(this.room);this.collision.setObstacles(this.room.furniture);
     this.cats=CATS.map((c,i)=>new Cat(this.scene,c,new THREE.Vector3(-2+i*2,0,2)));
+    this.playTransforms=this.cats.map(c=>({position:c.group.position.clone(),rotationY:c.group.rotation.y}));
     this.active=0;
     this.human=new Human(this.scene);
     this.movement=new MovementSystem(this.input,this.camera,this.collision,this.audio);
@@ -34,9 +35,42 @@ export class Game {
     this.renderer.domElement.addEventListener("pointerdown",()=>this.audio.ensure(),{once:true});
     this.renderer.domElement.oncontextmenu=e=>e.preventDefault();
   }
-  setMode(mode){this.mode=mode;this.ui.setMode(mode);this.editor.setEnabled(mode==="editor");if(mode!=="menu")this.audio.ensure();if(mode==="menu")this.arrangeMenuCats();}
+  setMode(mode){
+    const previous=this.mode;
+    if(mode==="menu"){
+      if(previous && previous!=="menu") this.savePlayCats();
+      this.arrangeMenuCats();
+    }else if(previous==="menu"){
+      this.restorePlayCats();
+    }
+    this.mode=mode;
+    this.ui.setMode(mode);
+    this.editor.setEnabled(mode==="editor");
+    if(mode!=="menu") this.audio.ensure();
+  }
   selectCat(i){this.active=i;this.cats.forEach((c,n)=>c.setSelected(n===i));this.ui.setCat(this.cats[i],i);this.audio.switchCat();}
-  arrangeMenuCats(){this.cats.forEach((c,i)=>{c.group.position.set((i-1)*1.55,0,0);c.group.rotation.y=-Math.PI/2;c.velocity.set(0,0,0);c.verticalVelocity=0;c.grounded=true;});}
+  savePlayCats(){
+    this.playTransforms=this.cats.map(c=>({position:c.group.position.clone(),rotationY:c.group.rotation.y}));
+  }
+  restorePlayCats(){
+    this.cats.forEach((c,i)=>{
+      const t=this.playTransforms[i];
+      c.group.position.copy(t.position);
+      c.group.rotation.y=t.rotationY;
+      c.velocity.set(0,0,0);
+      c.verticalVelocity=0;
+      c.grounded=true;
+    });
+  }
+  arrangeMenuCats(){
+    this.cats.forEach((c,i)=>{
+      c.group.position.set((i-1)*1.55,0,0);
+      c.group.rotation.y=-Math.PI/2;
+      c.velocity.set(0,0,0);
+      c.verticalVelocity=0;
+      c.grounded=true;
+    });
+  }
   updateMenu(dt,t){
     const focusX=(this.active-1)*.45;
     const desired=new THREE.Vector3(.2,2.0,5.7);this.camera.position.lerp(desired,1-Math.exp(-3*dt));this.camera.lookAt(focusX,.75,0);
