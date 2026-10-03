@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { ROOM, CATS } from "../config.js";
 import { Input } from "./Input.js";
 import { Cat } from "../entities/Cat.js";
+import { Piet } from "../entities/Piet.js";
 import { Human } from "../entities/Human.js";
 import { Room } from "../systems/Room.js";
 import { CollisionSystem } from "../systems/CollisionSystem.js";
@@ -26,7 +27,7 @@ export class Game {
       new THREE.Vector3(0,0,6),
       new THREE.Vector3(6,0,4)
     ];
-    this.cats=CATS.map((c,i)=>new Cat(this.scene,c,catSpawns[i]));
+    this.cats=CATS.map((c,i)=>c.id==="piet" ? new Piet(this.scene,c,catSpawns[i]) : new Cat(this.scene,c,catSpawns[i]));
     this.playTransforms=this.cats.map(c=>({position:c.group.position.clone(),rotationY:c.group.rotation.y}));
     this.active=0;
     this.human=new Human(this.scene);
