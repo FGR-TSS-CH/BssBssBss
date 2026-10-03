@@ -55,7 +55,7 @@ export class MovementSystem {
     this.stepTimer-=dt;
     if(cat.grounded && cat.velocity.length()>1.0 && this.stepTimer<=0){
       this.audio?.step();
-      this.stepTimer=sprint?.14:.23;
+      this.stepTimer=sprint ? .14 : .23;
     }
 
     if(cat.velocity.lengthSq()>.02){
