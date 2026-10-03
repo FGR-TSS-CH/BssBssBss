@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 export class MovementSystem {
-  constructor(input, camera, collision){ this.input=input; this.camera=camera; this.collision=collision; }
+  constructor(input, camera, collision, audio){ this.input=input; this.camera=camera; this.collision=collision; this.audio=audio; this.stepTimer=0; }
   update(cat, dt){
     const cfg=cat.config;
     if(this.input.consume("Space")) cat.jumpBuffer=.16;
@@ -17,7 +17,8 @@ export class MovementSystem {
     if(this.input.down("KeyA")) dir.sub(right);
     if(dir.lengthSq()) dir.normalize();
 
-    const max=(this.input.down("ShiftLeft")||this.input.down("ShiftRight"))?cfg.sprint:cfg.speed;
+    const sprint=this.input.down("ShiftLeft")||this.input.down("ShiftRight");
+    const max=sprint?cfg.sprint:cfg.speed;
     const desired=dir.multiplyScalar(max);
     const accel=cat.grounded?11:4.5;
     cat.velocity.lerp(desired,1-Math.exp(-accel*dt));
@@ -28,8 +29,10 @@ export class MovementSystem {
       cat.jumpBuffer=0;
       cat.coyote=0;
       cat.jumpState="air";
+      this.audio?.jump();
     }
 
+    const wasGrounded=cat.grounded;
     cat.verticalVelocity -= 14.5*dt;
     const from=cat.group.position.clone();
     const horizontal=from.clone().addScaledVector(cat.velocity,dt);
@@ -38,14 +41,21 @@ export class MovementSystem {
     cat.group.position.x=resolved.x; cat.group.position.z=resolved.z;
 
     cat.group.position.y += cat.verticalVelocity*dt;
-    const surface=this.collision.getTopSurfaceBelow(cat.group.position.x,cat.group.position.z,cat.group.position.y,.25);
+    const surface=this.collision.getTopSurfaceBelow(cat.group.position.x,cat.group.position.z,cat.group.position.y,.28);
     if(cat.group.position.y<=surface && cat.verticalVelocity<=0){
       cat.group.position.y=surface;
       cat.verticalVelocity=0;
       cat.grounded=true;
       cat.jumpState="ground";
+      if(!wasGrounded) this.audio?.land();
     }else{
       cat.grounded=false;
+    }
+
+    this.stepTimer-=dt;
+    if(cat.grounded && cat.velocity.length()>1.0 && this.stepTimer<=0){
+      this.audio?.step();
+      this.stepTimer=sprint?.14:.23;
     }
 
     if(cat.velocity.lengthSq()>.02){
