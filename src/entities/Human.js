@@ -15,13 +15,13 @@ export class Human {
 
     this.torso=cast(new THREE.Mesh(new THREE.CapsuleGeometry(.22,.68,8,14),shirt));
     this.torso.position.y=1.56;
-    this.torso.scale.set(1.08,1.17,.72);
+    this.torso.scale.set(.78,1.17,1.08);
     this.group.add(this.torso);
 
     const pelvis=cast(new THREE.Mesh(new THREE.CapsuleGeometry(.16,.18,6,10),jeans));
-    pelvis.rotation.z=Math.PI/2;
+    pelvis.rotation.x=Math.PI/2;
     pelvis.position.y=1.05;
-    pelvis.scale.z=.82;
+    pelvis.scale.x=.90;
     this.group.add(pelvis);
 
     this.headPivot=new THREE.Group();
@@ -45,7 +45,7 @@ export class Human {
     this.arms=[];
     for(const side of[-1,1]){
       const shoulder=new THREE.Group();
-      shoulder.position.set(side*.35,1.91,0);
+      shoulder.position.set(0,1.91,side*.35);
       this.group.add(shoulder);
 
       const upper=cast(new THREE.Mesh(new THREE.CapsuleGeometry(.07,.30,6,8),shirt));
@@ -71,7 +71,7 @@ export class Human {
     this.legs=[];
     for(const side of[-1,1]){
       const hip=new THREE.Group();
-      hip.position.set(side*.16,1.0,0);
+      hip.position.set(0,1.0,side*.16);
       this.group.add(hip);
 
       const thigh=cast(new THREE.Mesh(new THREE.CapsuleGeometry(.10,.36,6,8),jeans));
@@ -87,7 +87,7 @@ export class Human {
       knee.add(shin);
 
       const foot=cast(new THREE.Mesh(new THREE.BoxGeometry(.20,.10,.34),dark));
-      foot.position.set(.07,-.43,.08);
+      foot.position.set(.10,-.43,0);
       knee.add(foot);
 
       this.legs.push({hip,knee});
@@ -150,12 +150,12 @@ export class Human {
     const swing=Math.sin(this.walk)*.52;
     this.legs[0].hip.rotation.z=swing;
     this.legs[1].hip.rotation.z=-swing;
-    this.legs[0].knee.rotation.z=Math.max(0,-swing)*.65;
-    this.legs[1].knee.rotation.z=Math.max(0,swing)*.65;
-    this.arms[0].shoulder.rotation.z=-swing*.65;
-    this.arms[1].shoulder.rotation.z=swing*.65;
-    this.arms[0].elbow.rotation.z=.15+Math.max(0,swing)*.22;
-    this.arms[1].elbow.rotation.z=-.15-Math.max(0,-swing)*.22;
+    this.legs[0].knee.rotation.z=Math.max(0,-swing)*.58;
+    this.legs[1].knee.rotation.z=Math.max(0,swing)*.58;
+    this.arms[0].shoulder.rotation.z=-swing*.58;
+    this.arms[1].shoulder.rotation.z=swing*.58;
+    this.arms[0].elbow.rotation.z=.10+Math.max(0,swing)*.18;
+    this.arms[1].elbow.rotation.z=.10+Math.max(0,-swing)*.18;
     this.headPivot.rotation.y=Math.sin(this.walk*.18)*.06;
     this.torso.rotation.z=Math.sin(this.walk)*.018;
   }
